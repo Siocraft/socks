@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+venv/
+.env
+
+# Generated output (optional: remove if you want to track BMPs)
+output/
+
+# OS
+.DS_Store
