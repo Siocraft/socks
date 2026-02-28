@@ -69,6 +69,28 @@ Archivos concretos (la salida va junto a cada archivo si no usas `-o`):
 docker run --rm -v "$(pwd)/dat-files:/data:ro" -v "$(pwd)/dat-files:/data" dat2bmp dat2bmp.py /data/file1.dat /data/file2.dat
 ```
 
+## Configuración en Windows (Python y venv)
+
+Si quieres ejecutar el proyecto con Python en Windows (sin Docker):
+
+1. **Instala Python** desde [python.org/downloads](https://www.python.org/downloads/) y marca *"Add python.exe to PATH"* al instalar.
+
+2. **Crea un entorno virtual** (venv viene incluido con Python; no hace falta instalarlo aparte). En Windows, el comando `python` a veces abre la Microsoft Store; usa el launcher **`py`** en su lugar:
+   ```powershell
+   py -m venv venv
+   ```
+
+3. **Activa el venv:**
+   - **PowerShell:** `.\venv\Scripts\Activate.ps1`
+   - **Git Bash:** `source venv/Scripts/activate`
+   Si PowerShell da error de permisos: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`, luego vuelve a activar.
+
+4. **Instala dependencias:** `pip install -r requirements.txt`
+
+Con el venv activado, `python` y `pip` funcionan con normalidad. Para salir: `deactivate`.
+
+*(Opcional)* Para que `python` use tu instalación en lugar de abrir la Store: **Configuración → Aplicaciones → Configuración avanzada de aplicaciones → Alias de ejecución de aplicaciones** y desactiva los alias "python" y "python3".
+
 ## Uso local
 
 **Añadir imagen al .dat:**
