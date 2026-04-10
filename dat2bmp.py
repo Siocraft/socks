@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Convert .dat image files (custom HDR format: 48-byte header + raw RGB) to .bmp.
-All sample files are 80208 bytes = 48 header + 160×167×3 RGB.
+Convert .dat image files (48-byte header + raw RGB) to .bmp.
+Expected size: 80208 bytes = 48 header + 160×167×3 RGB.
 """
 import argparse
 import sys
@@ -9,23 +9,17 @@ from pathlib import Path
 
 from PIL import Image
 
-
-HEADER_SIZE = 48
-WIDTH = 160
-HEIGHT = 167
-BYTES_PER_PIXEL = 3
-EXPECTED_PAYLOAD = WIDTH * HEIGHT * BYTES_PER_PIXEL
-EXPECTED_SIZE = HEADER_SIZE + EXPECTED_PAYLOAD
+from sock_dat_format import load_dat_rgb
 
 
 def _pattern_visible(img: Image.Image, gamma: float = 0.45) -> Image.Image:
     """Make the design much more visible: percentile stretch + gamma brightening."""
     r, g, b = img.split()
-    n = len(list(r.getdata()))
+    n = r.size[0] * r.size[1]
     result_r, result_g, result_b = [0] * n, [0] * n, [0] * n
 
     for channel, result in ((r, result_r), (g, result_g), (b, result_b)):
-        arr = list(channel.getdata())
+        arr = list(channel.get_flattened_data())
         non_zero = [x for x in arr if x > 0]
         if not non_zero:
             continue
@@ -55,13 +49,7 @@ def dat_to_bmp(
 ) -> tuple[Path, Path | None]:
     """Read a .dat file and write a .bmp file. Returns (raw_bmp_path, pattern_bmp_path or None)."""
     data = dat_path.read_bytes()
-    if len(data) != EXPECTED_SIZE:
-        raise ValueError(
-            f"Unexpected .dat size: {len(data)} (expected {EXPECTED_SIZE}). "
-            f"Format may differ; this converter assumes 48-byte header + 160×167 RGB."
-        )
-    pixels = data[HEADER_SIZE:]
-    img = Image.frombytes("RGB", (WIDTH, HEIGHT), pixels)
+    _, img = load_dat_rgb(data)
     out = bmp_path or dat_path.with_suffix(".bmp")
     img.save(out, format="BMP")
     pattern_path: Path | None = None
@@ -104,7 +92,6 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # Expand directories to their .dat files
     inputs: list[Path] = []
     for p in args.input:
         if p.is_dir():

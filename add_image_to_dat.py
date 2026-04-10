@@ -10,13 +10,7 @@ from pathlib import Path
 
 from PIL import Image
 
-# Same format as dat2bmp
-HEADER_SIZE = 48
-WIDTH = 160
-HEIGHT = 167
-BYTES_PER_PIXEL = 3
-EXPECTED_PAYLOAD = WIDTH * HEIGHT * BYTES_PER_PIXEL
-EXPECTED_SIZE = HEADER_SIZE + EXPECTED_PAYLOAD
+from sock_dat_format import HEIGHT, WIDTH, dump_dat_rgb, read_dat_file
 
 SIZE_PRESETS = {
     "8x8": (8, 8),
@@ -27,7 +21,7 @@ SIZE_PRESETS = {
     "64x64": (64, 64),
     "80x80": (80, 80),
     "80x40": (80, 40),
-    "160x167": (160, 167),  # full canvas
+    "160x167": (160, 167),
 }
 
 
@@ -45,21 +39,6 @@ def _parse_size(s: str) -> tuple[int, int]:
     )
 
 
-def _dat_to_pil(data: bytes) -> Image.Image:
-    if len(data) != EXPECTED_SIZE:
-        raise ValueError(f"Expected .dat size {EXPECTED_SIZE}, got {len(data)}")
-    pixels = data[HEADER_SIZE:]
-    return Image.frombytes("RGB", (WIDTH, HEIGHT), pixels)
-
-
-def _pil_to_dat(header: bytes, img: Image.Image) -> bytes:
-    if img.size != (WIDTH, HEIGHT) or img.mode != "RGB":
-        img = img.resize((WIDTH, HEIGHT), Image.Resampling.NEAREST)
-        if img.mode != "RGB":
-            img = img.convert("RGB")
-    return header + img.tobytes()
-
-
 def add_image_to_dat(
     base_dat_path: Path,
     image_path: Path,
@@ -72,9 +51,7 @@ def add_image_to_dat(
     Composite image onto base .dat and write a new .dat.
     position is (x, y) top-left; if None, image is centered.
     """
-    data = base_dat_path.read_bytes()
-    header = data[:HEADER_SIZE]
-    base_img = _dat_to_pil(data)
+    header, base_img = read_dat_file(base_dat_path)
 
     overlay = Image.open(image_path)
     if overlay.mode == "RGBA":
@@ -87,13 +64,11 @@ def add_image_to_dat(
     overlay_resized = overlay_rgb.resize((ow, oh), resample)
 
     if position is None:
-        # center on canvas
         x = max(0, (WIDTH - ow) // 2)
         y = max(0, (HEIGHT - oh) // 2)
     else:
         x, y = position
 
-    # clip to canvas
     x = max(0, min(x, WIDTH - 1))
     y = max(0, min(y, HEIGHT - 1))
 
@@ -102,7 +77,7 @@ def add_image_to_dat(
     else:
         base_img.paste(overlay_resized, (x, y))
 
-    out_data = _pil_to_dat(header, base_img)
+    out_data = dump_dat_rgb(header, base_img)
     output_dat_path.write_bytes(out_data)
     return output_dat_path
 

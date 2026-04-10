@@ -2,34 +2,20 @@
 
 Añade una imagen personalizada a un diseño de calcetín (archivo `.dat`). Usa un `.dat` base y tu imagen (p. ej. PNG); la herramienta compone la imagen al tamaño y posición elegidos y escribe un nuevo `.dat` llamado `<base>_with_<image>.dat`. También puedes convertir `.dat` ↔ `.bmp` para previsualizar diseños.
 
+El formato binario compartido vive en [`sock_dat_format.py`](sock_dat_format.py); el alcance del producto está en [`docs/PRD.md`](docs/PRD.md).
+
 ## Inicio rápido
 
-1. **Construye** la imagen Docker (una vez):
-   ```bash
-   docker build -t dat2bmp .
-   ```
+1. **Opcional — Docker:** si usas contenedores, construye la imagen (una vez): `docker build -t dat2bmp .` (requiere un `Dockerfile` en el repo).
 
 2. **Añade tu imagen** a un diseño base. El resultado se guarda como `<base>_with_<image>.dat` en el directorio de salida.
-
-   **Docker:**
-   ```bash
-   docker run --rm \
-     -v "$(pwd)/dat-files:/data:ro" \
-     -v "$(pwd)/images:/images:ro" \
-     -v "$(pwd)/output:/output" \
-     dat2bmp add_image_to_dat.py \
-     "/data/02-79 y capibaras.dat" \
-     /images/your_image.png \
-     -o /output \
-     -s 64x32
-   ```
 
    **Local:**
    ```bash
    python add_image_to_dat.py "dat-files/02-79 y capibaras.dat" images/your_image.png -o output/ -s 64x32
    ```
 
-3. **Previsualiza** el nuevo .dat como BMP: `python dat2bmp.py output/<base>_with_<image>.dat -o output/ -f -p` (o usa Docker con `dat2bmp.py`).
+3. **Previsualiza** el nuevo .dat como BMP: `python dat2bmp.py output/<base>_with_<image>.dat -o output/ -f -p`
 
 ### Tamaño y posición
 
@@ -41,41 +27,11 @@ Añade una imagen personalizada a un diseño de calcetín (archivo `.dat`). Usa 
 
 Convierte archivos `.dat` (cabecera de 48 bytes + RGB 160×167) a `.bmp` para poder verlos. Usa `-p` para generar además un `*_pattern.bmp` con más contraste y ver mejor el diseño.
 
-## Build (Docker)
-
-Construye la imagen antes del primer `docker run`:
-
-```bash
-docker build -t dat2bmp .
-```
-
-## Ejecutar (Docker)
-
-Convertir .dat a .bmp:
-
-```bash
-docker run --rm -v "$(pwd)/dat-files:/data:ro" -v "$(pwd)/output:/output" dat2bmp dat2bmp.py /data -o /output
-```
-
-Para crear también los BMP de patrón visible, añade `-p`:
-
-```bash
-docker run --rm -v "$(pwd)/dat-files:/data:ro" -v "$(pwd)/output:/output" dat2bmp dat2bmp.py /data -o /output -p
-```
-
-Archivos concretos (la salida va junto a cada archivo si no usas `-o`):
-
-```bash
-docker run --rm -v "$(pwd)/dat-files:/data:ro" -v "$(pwd)/dat-files:/data" dat2bmp dat2bmp.py /data/file1.dat /data/file2.dat
-```
-
 ## Configuración en Windows (Python y venv)
-
-Si quieres ejecutar el proyecto con Python en Windows (sin Docker):
 
 1. **Instala Python** desde [python.org/downloads](https://www.python.org/downloads/) y marca *"Add python.exe to PATH"* al instalar.
 
-2. **Crea un entorno virtual** (venv viene incluido con Python; no hace falta instalarlo aparte). En Windows, el comando `python` a veces abre la Microsoft Store; usa el launcher **`py`** en su lugar:
+2. **Crea un entorno virtual** con el launcher **`py`** si hace falta:
    ```powershell
    py -m venv venv
    ```
@@ -83,13 +39,10 @@ Si quieres ejecutar el proyecto con Python en Windows (sin Docker):
 3. **Activa el venv:**
    - **PowerShell:** `.\venv\Scripts\Activate.ps1`
    - **Git Bash:** `source venv/Scripts/activate`
-   Si PowerShell da error de permisos: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`, luego vuelve a activar.
 
 4. **Instala dependencias:** `pip install -r requirements.txt`
 
-Con el venv activado, `python` y `pip` funcionan con normalidad. Para salir: `deactivate`.
-
-*(Opcional)* Para que `python` use tu instalación en lugar de abrir la Store: **Configuración → Aplicaciones → Configuración avanzada de aplicaciones → Alias de ejecución de aplicaciones** y desactiva los alias "python" y "python3".
+5. **Tests:** `pytest` (opcional: `pip install -r requirements.txt` incluye pytest).
 
 ## Uso local
 
@@ -100,15 +53,6 @@ python add_image_to_dat.py "dat-files/base.dat" images/your_image.png -o output/
 ```
 
 **Convertir .dat a .bmp (vista previa):**
-
-Para crear también los BMP de patrón visible, añade `-p`:
-
-```bash
-python dat2bmp.py dat-files/ -o output/ -p
-```
-
-Para sobrescribir archivos existentes, añade `-f`:
-
 ```bash
 python dat2bmp.py dat-files/ -o output/ -f -p
 ```
