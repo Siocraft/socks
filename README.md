@@ -19,6 +19,26 @@ El formato binario compartido vive en [`sock_dat_format.py`](sock_dat_format.py)
 
 3. **Previsualiza** el nuevo .dat como BMP: `python dat2bmp.py output/<base>_with_<image>.dat -o output/ -f -p`
 
+### Interfaz web (Streamlit)
+
+Con dependencias instaladas, ejecuta Streamlit **como módulo** (no hace falta `streamlit` en el `PATH`).
+
+**Windows (recomendado si `python` no existe o abre la Microsoft Store):**
+
+```bash
+py -m streamlit run streamlit_app.py
+```
+
+**Si `python` apunta a tu instalación real** (p. ej. Linux, macOS, o venv con `python` en PATH):
+
+```bash
+python -m streamlit run streamlit_app.py
+```
+
+En Git Bash, `streamlit` suelto suele dar `command not found`; usa siempre `py -m` o `python -m` como arriba.
+
+Se abre el navegador: sube un `.dat` base y una imagen, ajusta tamaño/posición y descarga el `.dat` compuesto. Las vistas usan el mismo contraste que `dat2bmp -p` para ver el diseño.
+
 ### Tamaño y posición
 
 - **Tamaño:** `-s` acepta presets (`8x8`, `16x16`, `32x32`, `64x32`, `64x64`, `80x80`, `80x40`, `160x167`) o `WxH` personalizado. Por defecto: `64x32`.
