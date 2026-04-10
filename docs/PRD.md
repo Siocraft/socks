@@ -52,11 +52,17 @@ The user selects a **base `.dat` file path** and a **reference image path**, run
 
 BMP (or PNG) is a **preview and debug interchange** only; Winpds is not expected to read those files. The canonical edit path is **decode → PIL → encode**.
 
+### Winpds compatibility (pattern head / “PDS 8F”)
+
+Winpds does not treat the first 48 bytes as arbitrary padding. When opening a file (for example with **Korea-Robot Drumless**), it reads **pattern data head** information and validates the pattern type. If the header does not match what the reader expects (for example **PDS 8F Pattern**), the software shows an error such as **“Korea-Robot is not PDS 8F Pattern”** and stops loading.
+
+The tools in this repo therefore assume the **base `.dat` was saved by Winpds** (or otherwise already has a valid head for your reader). They **copy those header bytes unchanged** when writing output. A file built only to match the **byte length** 80,208 with a **made-up** header is enough for Python round-trip tests but **will not open in Winpds**. Always start from a real design file for anything you need to open in the app.
+
 ## Success criteria
 
-- Winpds opens the output `.dat` without error on representative designs.
+- Winpds opens the output `.dat` without error when the **input** `.dat` already opened correctly with the same reader/settings.
 - Visual spot-check: pasted region matches the reference image after resize (within resampling limits).
-- **Round-trip:** reading bytes → image → bytes with **no edits** reproduces identical file contents (see automated test with synthetic payload).
+- **Round-trip (Python):** reading bytes → image → bytes with **no edits** reproduces identical file contents (automated tests use a synthetic payload to check layout only, not Winpds semantics).
 
 ## Risks and mitigations
 
@@ -65,6 +71,7 @@ BMP (or PNG) is a **preview and debug interchange** only; Winpds is not expected
 | Templates differ in dimensions or layout | Strict size check; extend format module when new samples are confirmed |
 | Header fields must change when pixels change | If Winpds rejects files, use binary diff after changing one pixel in Winpds to learn header rules |
 | Color interpretation differs from Winpds | Document RGB8; offer `--nearest` and palette-style workflows later if needed |
+| Synthetic or hand-built headers fail Winpds validation | Only use bases exported from Winpds; do not expect arbitrary 48-byte headers to load |
 
 ## Repository layout
 

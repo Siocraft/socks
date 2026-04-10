@@ -9,5 +9,8 @@ venv/
 # Generated output
 output/
 
+# Legacy smoke file; not a valid Winpds pattern head (see dat-files/README.md)
+dat-files/sample_synthetic.dat
+
 # OS
 .DS_Store

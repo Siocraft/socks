@@ -4,6 +4,8 @@ Añade una imagen personalizada a un diseño de calcetín (archivo `.dat`). Usa 
 
 El formato binario compartido vive en [`sock_dat_format.py`](sock_dat_format.py); el alcance del producto está en [`docs/PRD.md`](docs/PRD.md).
 
+**Importante (Winpds):** el programa valida la cabecera del patrón (p. ej. tipo **PDS 8F**). Los `.dat` deben ser **diseños guardados desde Winpds** (o con la misma cabecera válida). Si abres un archivo solo generado para pruebas de tamaño con cabecera inventada, verás errores del tipo *«Korea-Robot is not PDS 8F Pattern»*. Coloca tus `.dat` reales en `dat-files/` y úsalos como base con `add_image_to_dat.py`.
+
 ## Inicio rápido
 
 1. **Opcional — Docker:** si usas contenedores, construye la imagen (una vez): `docker build -t dat2bmp .` (requiere un `Dockerfile` en el repo).
